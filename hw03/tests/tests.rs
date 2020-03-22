@@ -49,7 +49,7 @@ fn test_iterator() {
     assert_eq!(bst.find(-1), false);
 
     let elements = vec![5,-5,2,-2,6,-6];
-    let expected = vec![5,6];
+    let expected = vec![5,-5,6,-6,2,-2];
 
     for e in &elements {
         bst.insert(*e);
@@ -69,7 +69,7 @@ fn test_iter() {
     assert_eq!(bst.find(-1), false);
 
     let elements = vec![5,-5,2,-2,6,-6];
-    let expected = vec![5,6];
+    let expected = vec![5,-5,6,-6,2,-2];
 
     for e in &elements {
         bst.insert(*e);
@@ -92,7 +92,7 @@ fn test_mut_iter() {
     assert_eq!(bst.find(-1), false);
 
     let elements = vec![5,-5,2,-2,6,-6];
-    let expected = vec![5,6];
+    let expected = vec![5,-5,6,-6,2,-2];
 
     for e in &elements {
         bst.insert(*e);

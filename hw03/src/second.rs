@@ -1,3 +1,5 @@
+use std::collections::VecDeque;
+
 #[derive(Debug)]
 struct Node<T> {
     element: T,
@@ -91,17 +93,31 @@ impl<T: Default + Ord> BST<T> {
     }
 }
 
-pub struct IntoIter<T: Copy>(Link<T>);
+pub struct IntoIter<T: Copy> {
+    next: VecDeque<Link<T>>,
+}
 
 impl<T: Copy> Iterator for IntoIter<T> {
     type Item = T;
     fn next(&mut self) -> Option<Self::Item> {
-        if let Some(node) = self.0.take() {
-            let value = node.element;
-            self.0 = node.right;
-            return Some(value);
+        let next = self.next.pop_front();
+
+        match next {
+            Some(link) => match link {
+                Some(node) => {
+                    if node.left.is_some() {
+                        self.next.push_back(node.left);
+                    }
+                    if node.right.is_some() {
+                        self.next.push_back(node.right);
+                    }
+                    let value = node.element;
+                    Some(value)
+                }
+                _ => None,
+            },
+            _ => None,
         }
-        None
     }
 }
 
@@ -110,12 +126,14 @@ impl<T: Default + Copy + Ord> IntoIterator for BST<T> {
     type IntoIter = IntoIter<Self::Item>;
 
     fn into_iter(self) -> IntoIter<T> {
-        IntoIter(self.root)
+        IntoIter {
+            next: VecDeque::from(vec![self.root]),
+        }
     }
 }
 
 pub struct Iter<'a, T: 'a> {
-    next: Option<&'a Node<T>>,
+    next: VecDeque<Option<&'a Node<T>>>,
 }
 
 impl<'a, T: Default + Copy + Ord> IntoIterator for &'a BST<T> {
@@ -123,7 +141,7 @@ impl<'a, T: Default + Copy + Ord> IntoIterator for &'a BST<T> {
     type IntoIter = Iter<'a, T>;
     fn into_iter(self) -> Self::IntoIter {
         Iter {
-            next: self.root.as_ref().map(|link| &**link),
+            next: VecDeque::from(vec![self.root.as_ref().map(|link| &**link)]),
         }
     }
 }
@@ -131,15 +149,23 @@ impl<'a, T: Default + Copy + Ord> IntoIterator for &'a BST<T> {
 impl<'a, T: Default + Copy + Ord> Iterator for Iter<'a, T> {
     type Item = &'a T;
     fn next(&mut self) -> Option<Self::Item> {
-        self.next.map(|node| {
-            self.next = node.right.as_ref().map(|node| &**node);
-            &node.element
-        })
+        self.next.pop_front().map(|link| {
+            link.map(|node| {
+                if node.left.is_some() {
+                    self.next.push_back(node.left.as_ref().map(|node| &**node));
+                }
+                if node.right.is_some() {
+                    self.next.push_back(node.right.as_ref().map(|node| &**node));
+                }
+
+                &node.element
+            })
+        }).flatten()
     }
 }
 
 pub struct IterMut<'a, T: 'a> {
-    next: Option<&'a mut Node<T>>,
+    next: VecDeque<Option<&'a mut Node<T>>>,
 }
 
 impl<'a, T: Default + Copy + Ord> IntoIterator for &'a mut BST<T> {
@@ -147,7 +173,7 @@ impl<'a, T: Default + Copy + Ord> IntoIterator for &'a mut BST<T> {
     type IntoIter = IterMut<'a, T>;
     fn into_iter(self) -> Self::IntoIter {
         IterMut {
-            next: self.root.as_mut().map(|link| &mut **link),
+            next: VecDeque::from(vec![self.root.as_mut().map(|link| &mut **link)]),
         }
     }
 }
@@ -155,9 +181,17 @@ impl<'a, T: Default + Copy + Ord> IntoIterator for &'a mut BST<T> {
 impl<'a, T: Default + Copy + Ord> Iterator for IterMut<'a, T> {
     type Item = &'a mut T;
     fn next(&mut self) -> Option<Self::Item> {
-        self.next.take().map(|node| {
-            self.next = node.right.as_mut().map(|node| &mut **node);
-            &mut node.element
-        })
+        self.next.pop_front().map(|link| {
+            link.map(|node| {
+                if node.left.is_some() {
+                    self.next.push_back(node.left.as_mut().map(|node| &mut **node));
+                }
+                if node.right.is_some() {
+                    self.next.push_back(node.right.as_mut().map(|node| &mut **node));
+                }
+
+                &mut node.element
+            })
+        }).flatten()
     }
 }
