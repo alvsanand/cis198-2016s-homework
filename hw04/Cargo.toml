@@ -1,0 +1,11 @@
+[package]
+name = "hw04"
+version = "0.1.0"
+authors = ["Alvaro Santos Andres <alvsanand@gmai.com>"]
+
+[dependencies]
+clippy = { version = "*", optional = true }
+rand = "0.7.3"
+
+[features]
+default = []
