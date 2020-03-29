@@ -1,0 +1,17 @@
+[package]
+name = "bbs"
+version = "0.1.0"
+edition = "2018"
+authors = ["alvsanand@gmail.com"]
+
+
+[dependencies]
+bytes = "0.5"
+chrono = "0.4"
+clap = "2.33.0"
+hyper = "0.13.4"
+hyper-tls = "0.4.1"
+regex = "1.3.6"
+rustc-serialize = "0.3.24"
+tokio = { version = "0.2", features = ["full"] }
+
