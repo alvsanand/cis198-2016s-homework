@@ -1,0 +1,15 @@
+[package]
+name = "webchat"
+version = "0.1.0"
+edition = "2018"
+authors = ["alvsanand@gmail.com"]
+
+[dependencies]
+futures = "0.3.4"
+futures-util = "0.3.4"
+hyper = "0.13.4"
+hyper-tls = "0.4.1"
+rustc-serialize = "0.3.24"
+tokio = { version = "0.2", features = ["full"] }
+tokio-tungstenite = "0.10.1"
+tungstenite = "0.10.0"
